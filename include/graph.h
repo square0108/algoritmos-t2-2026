@@ -4,10 +4,13 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
+#include <utility>
+#include <forward_list>
+#include <sstream>
 
-template <typename weight_T>
+template <typename T>
 struct Graph{
-  std::vector<std::vector<weight_T>> adj_mat;
+  std::vector<std::vector<T>> adj_mat;
 
   Graph(void) {
   }
@@ -16,20 +19,21 @@ struct Graph{
     // Fill de todo el grafo con "distancia" infinita
     adj_mat.resize(
       n_verts, 
-      std::vector<weight_T>(
+      std::vector<T>(
         n_verts, 
-        std::numeric_limits<weight_T>::max()
+        std::numeric_limits<T>::max()
       )
     );
 
     for (size_t i = 0; i < n_verts; i++) {
-      adj_mat[i][i] = weight_T(); // Todos los nodos tienen dist 0 consigos mismos por defecto
+      adj_mat[i][i] = T(); // Todos los nodos tienen dist 0 consigos mismos por defecto
       // (podrían haber self loops?)
     }
   }
 
   // Overload para parsear grafo desde archivo
-  Graph(const std::string filename, bool zero_indexed = true) {
+  Graph(const std::string filename, bool is_directed = true, bool zero_indexed = true)
+  {
     std::ifstream input(filename);
     std::string line;
 
@@ -37,20 +41,20 @@ struct Graph{
     std::stringstream ss(line);
 
     size_t n_verts,n_edges,u,v;
-    weight_T weight;
+    T weight;
 
     ss >> n_verts >> n_verts >> n_edges;
 
     adj_mat.resize(
       n_verts,
-      std::vector<weight_T>(
+      std::vector<T>(
         n_verts,
-        std::numeric_limits<weight_T>::max();
+        std::numeric_limits<T>::max()
       )
     );
 
     for (size_t i = 0; i < n_verts; i++) {
-      adj_mat[i][i] = weight_T(); // Todos los nodos tienen dist 0 consigos mismos por defecto
+      adj_mat[i][i] = T(); // Todos los nodos tienen dist 0 consigos mismos por defecto
     }
 
     // Parsear grafo arista por arista, en tuplas (vert1, vert2, peso arista)
@@ -62,7 +66,7 @@ struct Graph{
 
       ss >> u >> v >> weight;
 
-      if (zero_indexed) {
+      if (!zero_indexed) {
         u--;
         v--;
       }
@@ -72,30 +76,97 @@ struct Graph{
         continue;
       }
 
-      adj_mat[u][v] = std::min(adj[u][v], weight);
-      adj_mat[v][u] = std::min(adj[v][u], weight);
+      adj_mat[u][v] = std::min(adj_mat[u][v], weight);
+      if (!is_directed)
+        adj_mat[v][u] = std::min(adj_mat[v][u], weight); 
     }
   }
 
   // Acceso a fila de matriz
-  std::vector<T>& operator[](size_t i) {
+  std::vector<T>& operator[](size_t i)
+  {
     return adj_mat[i];
   }
 
-  size_t size(void) {
+  size_t size(void)
+  {
     return adj_mat.size();
   }
 
   void print(void) {
     size_t n_verts = size();
-    const weight_T T_max = std::numeric_limits<weight_T>::max();
+    const T T_max = std::numeric_limits<T>::max();
 
     for (size_t i = 0; i < n_verts; i++) {
-      // Te quiero mucho operador ternario
-      std::cout << (adj_mat[i][0] == T_max ? -1 : adj_mat[i][0]);
 
-      for (size_t j = 1; j < n_verts; j++) {
-        std::cout << ' ' << (adj_mat[i][j] == T_max ? -1 : adj_mat[i][j]);
+      for (size_t j = 0; j < n_verts; j++) {
+        if (adj_mat[i][j] == T_max)
+          std::cout << "INF";
+        else
+          std::cout << adj_mat[i][j];
+        std::cout << ' ' << '\t';
+      }
+
+      std::cout << std::endl;
+    }
+  }
+};
+
+template <typename T>
+struct AdjacencyList{
+  // "Cola" de una arista (pues no guarda ambos vértices), para las listas enlazadas de vecinos
+  struct EdgeTail {
+    size_t tail_vertex;
+    T weight;
+  };
+
+  std::vector<std::forward_list<EdgeTail>> adj_list;
+  Graph<T> *graph;
+
+  AdjacencyList(){
+  }
+
+  AdjacencyList(Graph<T>& g) {
+    size_t n_verts = g.size();
+
+    adj_list.resize(
+      n_verts,
+      std::forward_list<EdgeTail>()
+    );
+
+    T T_max = std::numeric_limits<T>::max();
+
+    // Insertar vecinos de cada vértice en la lista de adyacencia
+    for (size_t i = 0; i < n_verts; i++) {
+      for (size_t j = 0; j < n_verts; j++) {
+        if (g[i][j] != T() && g[i][j] != T_max) {
+          EdgeTail new_neighbor = {j,g[i][j]};
+          (adj_list[i]).push_front(new_neighbor);
+        }
+      }
+    }
+  }
+
+  // Get the list of vertex i's neighbors
+  std::forward_list<EdgeTail> &operator[](size_t i) {
+    return adj_list[i];
+  }
+
+  void print(void) {
+    size_t n_verts = adj_list.size();
+    const T T_max = std::numeric_limits<T>::max();
+
+    for (size_t i = 0; i < n_verts; i++) {
+      std::cout << i << ": ";
+      std::forward_list<EdgeTail> list = adj_list[i];
+
+      for (auto& tail_edge : list) {
+        std::cout << "(" 
+        << tail_edge.tail_vertex 
+        << ", "
+        << tail_edge.weight
+        << ")"
+        << '\t';
       }
 
       std::cout << std::endl;
