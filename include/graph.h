@@ -121,7 +121,6 @@ struct AdjacencyList{
   };
 
   std::vector<std::forward_list<EdgeTail>> adj_list;
-  Graph<T> *graph;
 
   AdjacencyList(){
   }
