@@ -1,3 +1,6 @@
+#ifndef GRAPH_H
+#define GRAPH_H
+
 #include <vector>
 #include <limits>
 #include <string>
@@ -83,13 +86,11 @@ struct Graph{
   }
 
   // Acceso a fila de matriz
-  std::vector<T>& operator[](size_t i)
-  {
+  std::vector<T>& operator[](size_t i) {
     return adj_mat[i];
   }
 
-  size_t size(void)
-  {
+  size_t size(void) {
     return adj_mat.size();
   }
 
@@ -114,32 +115,31 @@ struct Graph{
 
 template <typename T>
 struct AdjacencyList{
-  // "Cola" de una arista (pues no guarda ambos vértices), para las listas enlazadas de vecinos
-  struct EdgeTail {
-    size_t tail_vertex;
+  // "Cola" de una arista (pues lista ady. sólo enlaza vecinos)
+  struct EdgeHead {
+    size_t head_vertex; // head --> tail
     T weight;
   };
 
-  std::vector<std::forward_list<EdgeTail>> adj_list;
+  std::vector<std::forward_list<EdgeHead>> adj_list;
 
   AdjacencyList(){
   }
 
   AdjacencyList(Graph<T>& g) {
     size_t n_verts = g.size();
-
     adj_list.resize(
       n_verts,
-      std::forward_list<EdgeTail>()
+      std::forward_list<EdgeHead>()
     );
 
     T T_max = std::numeric_limits<T>::max();
 
-    // Insertar vecinos de cada vértice en la lista de adyacencia
+    // Insertar vecinos de cada vértice en la matriz de adyacencia dentro de la lista de adyacencia
     for (size_t i = 0; i < n_verts; i++) {
       for (size_t j = 0; j < n_verts; j++) {
         if (g[i][j] != T() && g[i][j] != T_max) {
-          EdgeTail new_neighbor = {j,g[i][j]};
+          EdgeHead new_neighbor = {j,g[i][j]};
           (adj_list[i]).push_front(new_neighbor);
         }
       }
@@ -147,8 +147,12 @@ struct AdjacencyList{
   }
 
   // Get the list of vertex i's neighbors
-  std::forward_list<EdgeTail> &operator[](size_t i) {
+  std::forward_list<EdgeHead> &operator[](size_t i) {
     return adj_list[i];
+  }
+
+  size_t size(void) {
+    return adj_list.size();
   }
 
   void print(void) {
@@ -157,11 +161,11 @@ struct AdjacencyList{
 
     for (size_t i = 0; i < n_verts; i++) {
       std::cout << i << ": ";
-      std::forward_list<EdgeTail> list = adj_list[i];
+      std::forward_list<EdgeHead> list = adj_list[i];
 
       for (auto& tail_edge : list) {
         std::cout << "(" 
-        << tail_edge.tail_vertex 
+        << tail_edge.head_vertex 
         << ", "
         << tail_edge.weight
         << ")"
@@ -172,3 +176,5 @@ struct AdjacencyList{
     }
   }
 };
+
+#endif
