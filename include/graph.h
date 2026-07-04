@@ -44,7 +44,9 @@ struct Graph{
 
     std::getline(input, line);
     std::stringstream ss(line);
-    if ((ss.str()).find('%') != std::string::npos) {
+
+    // Ignorar comentarios
+    while ((ss.str()).find('%') != std::string::npos) {
       std::getline(input,line);
       ss.clear();
       ss.str(std::string());
