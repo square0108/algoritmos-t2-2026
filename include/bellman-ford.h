@@ -9,9 +9,9 @@ struct BellmanFordResult
   bool no_negative_cycles;
   std::vector<T> distances;
   std::vector<size_t> predecessors;
-  const T INFTY = std::numeric_limits<T>::max();
 
   void print_distances(bool zero_indexed=true) {
+    const T INFTY = std::numeric_limits<T>::max();
     auto print_idx = zero_indexed ? 0 : 1;
     for (auto i = 0; i < distances.size(); i++) {
       if (distances[i] == INFTY)
@@ -22,6 +22,7 @@ struct BellmanFordResult
   }
 
   void print_predecessors(bool zero_indexed=true) {
+    const T INFTY = std::numeric_limits<T>::max();
     auto print_idx = zero_indexed ? 0 : 1;
     for (auto i = 0; i < predecessors.size(); i++) {
       if (predecessors[i] == NO_PREDECESSOR)
