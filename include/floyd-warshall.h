@@ -11,34 +11,26 @@ struct FloydWarshallResult {
   T INFTY = std::numeric_limits<T>::max();
 
   void print_distances(bool zero_indexed = true) {
-    auto print_idx = zero_indexed ? 0 : 1;
-
-    for (auto i = 0; i < distances.size(); i++) {
-      std::cout << "v_" << print_idx << ": \t";
-      for (auto j = 0; j < distances.size(); j++) {
+    for (size_t i = 0; i < distances.size(); i++) {
+      for (size_t j = 0; j < distances.size(); j++) {
         if (distances[i][j] == INFTY)
           std::cout << "INF\t";
         else
           std::cout << distances[i][j] << '\t';
       }
       std::cout << std::endl;
-      print_idx++;
     }
   }
 
   void print_predecessors(bool zero_indexed = true) {
-    auto print_idx = zero_indexed ? 0 : 1;
-
-    for (auto i = 0; i < predecessors.size(); i++) {
-      std::cout << "v_" << print_idx << ": \t";
-      for (auto j = 0; j < predecessors.size(); j++) {
+    for (size_t i = 0; i < predecessors.size(); i++) {
+      for (size_t j = 0; j < predecessors.size(); j++) {
         if (predecessors[i][j] == NO_PREDECESSOR)
           std::cout << "NIL\t";
         else
           std::cout << predecessors[i][j] << '\t';
       }
       std::cout << std::endl;
-      print_idx++;
     }
   }
 };
