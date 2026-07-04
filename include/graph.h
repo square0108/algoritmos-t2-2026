@@ -44,6 +44,12 @@ struct Graph{
 
     std::getline(input, line);
     std::stringstream ss(line);
+    if ((ss.str()).find('%') != std::string::npos) {
+      std::getline(input,line);
+      ss.clear();
+      ss.str(std::string());
+      ss.str(line);
+    }
 
     size_t n_verts,n_edges,u,v;
     T weight;
