@@ -3,33 +3,31 @@
 
 #include "graph.h"
 
-const size_t NO_PREDECESSOR = std::numeric_limits<size_t>::max();
-
 template <typename T>
 struct BellmanFordResult
 {
   bool no_negative_cycles;
-  std::vector<T> dist_to_root;
-  std::vector<size_t> predecessor;
+  std::vector<T> distances;
+  std::vector<size_t> predecessors;
   const T INFTY = std::numeric_limits<T>::max();
 
   void print_distances(bool zero_indexed=true) {
     auto print_idx = zero_indexed ? 0 : 1;
-    for (auto i = 0; i < dist_to_root.size(); i++) {
-      if (dist_to_root[i] == INFTY)
+    for (auto i = 0; i < distances.size(); i++) {
+      if (distances[i] == INFTY)
         std::cout << "v_" << print_idx++ << ": INF" << std::endl;
       else 
-        std::cout << "v_" << print_idx++ << ": " << dist_to_root[i] << std::endl;
+        std::cout << "v_" << print_idx++ << ": " << distances[i] << std::endl;
     }
   }
 
   void print_predecessors(bool zero_indexed=true) {
     auto print_idx = zero_indexed ? 0 : 1;
-    for (auto i = 0; i < predecessor.size(); i++) {
-      if (predecessor[i] == NO_PREDECESSOR)
+    for (auto i = 0; i < predecessors.size(); i++) {
+      if (predecessors[i] == NO_PREDECESSOR)
         std::cout << "v_" << print_idx++ << ": NIL" << std::endl;
       else
-        std::cout << "v_" << print_idx++ << ": " << predecessor[i] << std::endl;
+        std::cout << "v_" << print_idx++ << ": " << predecessors[i] << std::endl;
     }
   }
 };

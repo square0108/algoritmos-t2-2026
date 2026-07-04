@@ -11,6 +11,8 @@
 #include <forward_list>
 #include <sstream>
 
+const size_t NO_PREDECESSOR = std::numeric_limits<size_t>::max();
+
 template <typename T>
 struct Graph{
   std::vector<std::vector<T>> adj_mat;
