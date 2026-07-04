@@ -1,17 +1,30 @@
 #include "graph.h"
 #include "bellman-ford.h"
+#include "floyd-warshall.h"
 #include <iostream>
 
 void error_msg();
+template <typename T>
+void debug_print_results(FloydWarshallResult<T> r, bool zero_indexed);
+template <typename T>
+void debug_print_results(BellmanFordResult<T> r, bool zero_indexed);
 
 int main(int argc, char* argv[]) {
-  std::string filename = argv[1];
   bool is_zero_indexed;
-  if (argc == 3) {
-    std::string zero_index_option = argv[2];
-    if (zero_index_option == "-1") is_zero_indexed = false;
-    else if (zero_index_option == "-0") is_zero_indexed = true;
-    else error_msg();
+  std::string filename;
+  std::string algo_option;
+  std::string zero_index_option;
+  if (argc == 4) {
+    filename = argv[1];
+    algo_option = argv[2];
+    zero_index_option = argv[3];
+
+    if (zero_index_option == "-1")
+      is_zero_indexed = false;
+    else if (zero_index_option == "-0")
+      is_zero_indexed = true;
+    else
+      error_msg();
   }
   else {
     error_msg();
@@ -26,18 +39,41 @@ int main(int argc, char* argv[]) {
   a.print();
 
   size_t root = 0;
-  auto t = Bellman_Ford(a, root);
-  std::cout << "Root vertex: " << root << std::endl;
-  std::cout << "No negative cycle?: " << t.no_negative_cycles << std::endl;
-  std::cout << "Shortest path distances: " << std::endl;
-  t.print_distances(is_zero_indexed);
-  std::cout << "Shortest path predecessors: " << std::endl;
-  t.print_predecessors(is_zero_indexed);
+  
+  if (algo_option == "--FW") {
+    FloydWarshallResult<double> fw_r = Floyd_Warshall(g);
+    debug_print_results<double>(fw_r, is_zero_indexed);
+  }
+  else if (algo_option == "--BF") {
+    BellmanFordResult<double> bf_r = Bellman_Ford(a, root);
+    debug_print_results<double>(bf_r, is_zero_indexed);
+  }
+  else
+    error_msg();
 
   return 0;
 }
 
 void error_msg() {
-  std::cerr << "Usage: ./executable <path_to_graph_file> <> [-0 | -1]" << std::endl << "such that -0 is for zero indexed, -1 is for one indexed" << std::endl;
+  std::cerr << "Usage: ./executable <path_to_graph_file> <--FW | --BF> <-0 | -1>" << std::endl << "such that -0 is for zero indexed, -1 is for one indexed" << std::endl;
   exit(-1);
+}
+
+template <typename T>
+void debug_print_results(FloydWarshallResult<T> r, bool zero_indexed) {
+  std::cout << "No negative cycle?: " << r.no_negative_cycles << std::endl;
+  std::cout << "Shortest path distances: " << std::endl;
+  r.print_distances(zero_indexed);
+  std::cout << "Shortest path predecessors: " << std::endl;
+  r.print_predecessors(zero_indexed);
+}
+
+
+template <typename T>
+void debug_print_results(BellmanFordResult<T> r, bool zero_indexed) {
+  std::cout << "No negative cycle?: " << r.no_negative_cycles << std::endl;
+  std::cout << "Shortest path distances: " << std::endl;
+  r.print_distances(zero_indexed);
+  std::cout << "Shortest path predecessors: " << std::endl;
+  r.print_predecessors(zero_indexed);
 }
