@@ -45,52 +45,76 @@ struct FloydWarshallResult {
 
 template <typename T>
 FloydWarshallResult<T> Floyd_Warshall(Graph<T>& graph) {
-  // Como en cualquier momento sólo se utilizan recursiones nivel k-1 y k, sólo se necesitan 2 matrices adicionales, en vez de guardar todas desde D^(0) hasta D^(n).
-  // En realidad, sólo se necesita una matriz de predecesores.
-  // Y más aún, sólo se necesita una matriz adicional de distancias, pues las escrituras son siempre a (i,j)..
-  // https://stackoverflow.com/questions/30836663/why-does-floyd-warshall-just-use-one-distance-matrix
+  // Como en cualquier momento sólo se utilizan recursiones nivel (k-1) y (k), 
+  // sólo se necesitan 2 matrices adicionales, en vez de guardar todas desde D^(0) hasta D^(n).
 
   size_t n_verts = graph.size();
-  std::vector<std::vector<T> > distances_k;
-  std::vector<std::vector<size_t> > predecessors_k;
+  std::vector<std::vector<T> > distances_k1, distances_k2;
+  std::vector<std::vector<size_t> > predecessors_k1, predecessors_k2;
   T INFTY = std::numeric_limits<T>::max();
 
-  distances_k = graph.adj_mat;
-  predecessors_k.resize(n_verts);
+  distances_k1 = graph.adj_mat; // D^(0)
+  distances_k2.resize(n_verts, std::vector<T>(n_verts, INFTY));
+  predecessors_k1.resize(n_verts);
+  predecessors_k2.resize(n_verts, std::vector<size_t>(n_verts, NO_PREDECESSOR));
 
-  // Inicialización de \Pi^(0) (predecessors_k)
+  // Inicialización de \Pi^(0) (predecessors_k1)
   for (size_t i = 0; i < n_verts; i++) {
-    predecessors_k[i].resize(n_verts);
+    predecessors_k1[i].resize(n_verts);
     for (size_t j = 0; j < n_verts; j++) {
       if (i == j || graph[i][j] == INFTY)
-        predecessors_k[i][j] = NO_PREDECESSOR;
+        predecessors_k1[i][j] = NO_PREDECESSOR;
       else
-        predecessors_k[i][j] = i;
+        predecessors_k1[i][j] = i;
     }
   }
 
   // Loop principal
+  // Alternar entre distances_k1 y distances_k2 para elegir cuál es (k-1) y cuál es (k)
+  std::vector<std::vector<T>> *k_dist;
+  std::vector<std::vector<T>> *k_minus1_dist;
+  std::vector<std::vector<size_t>> *k_pred;
+  std::vector<std::vector<size_t>> *k_minus1_pred;
+
   for (size_t k = 0; k < n_verts; k++) {
+    // Matriz (k) inicial es siempre k1, (k-1) inicial es k2.
+    if (k % 2 == 0) {
+      k_minus1_dist = &distances_k1;
+      k_minus1_pred = &predecessors_k1;
+      k_dist = &distances_k2;
+      k_pred = &predecessors_k2;
+    }
+    else {
+      k_minus1_dist = &distances_k2;
+      k_minus1_pred = &predecessors_k2;
+      k_dist = &distances_k1;
+      k_pred = &predecessors_k1;
+    }
+
     for (size_t i = 0; i < n_verts; i++) {
       for (size_t j = 0; j < n_verts; j++) {
-        // evitar overflow, si uno de los dos es infinito no hay update
-        if (distances_k[i][k] == INFTY || distances_k[k][j] == INFTY)
-          continue;
-
-        if (distances_k[i][j] > distances_k[i][k] + distances_k[k][j]) {
-          distances_k[i][j] = distances_k[i][k] + distances_k[k][j];
-          predecessors_k[i][j] = predecessors_k[k][j]; 
+        // Primeras 2 condiciones para evitar overflow
+        // Si la distancia k-1 no mejora con el detour, se conserva dist(k-1) en dist(k).
+        if ((*k_minus1_dist)[i][k] == INFTY 
+        || (*k_minus1_dist)[k][j] == INFTY
+        || (*k_minus1_dist)[i][j] <= (*k_minus1_dist)[i][k] + (*k_minus1_dist)[k][j]) 
+        {
+          (*k_dist)[i][j] = (*k_minus1_dist)[i][j];
+          (*k_pred)[i][j] = (*k_minus1_pred)[i][j];
         }
-        // else, no hay mejora por el detour, no hay cambio
-      }
 
+        else /*(distances_k[i][j] > distances_(k-1)[i][k] + distances_(k-1)[k][j])*/ {
+          (*k_dist)[i][j] = (*k_minus1_dist)[i][k] + (*k_minus1_dist)[k][j];
+          (*k_pred)[i][j] = (*k_minus1_pred)[k][j]; 
+        }
+      }
       // Detección de ciclos negativos
-      if (distances_k[i][i] < T())
-        return FloydWarshallResult<T>{false, distances_k, predecessors_k};
+      if ((*k_dist)[i][i] < T())
+        return FloydWarshallResult<T>{false, *k_dist, *k_pred};
     }
   }
 
-  return FloydWarshallResult<T>{true, distances_k, predecessors_k};
+  return FloydWarshallResult<T>{true, *k_dist, *k_pred};
 }
 
 #endif
