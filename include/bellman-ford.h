@@ -9,32 +9,36 @@ struct BellmanFordResult
   bool no_negative_cycles;
   std::vector<T> distances;
   std::vector<size_t> predecessors;
+  size_t root;
 
   void print_distances(bool zero_indexed=true) {
     const T INFTY = std::numeric_limits<T>::max();
     auto print_idx = zero_indexed ? 0 : 1;
-    for (auto i = 0; i < distances.size(); i++) {
+    
+    for (size_t i = 0; i < distances.size(); i++) {
       if (distances[i] == INFTY)
-        std::cout << "v_" << print_idx++ << ": INF" << std::endl;
+        std::cout << "INF";
       else 
-        std::cout << "v_" << print_idx++ << ": " << distances[i] << std::endl;
+        std::cout << distances[i];
+      std::cout << "\t";
     }
+    std::cout << std::endl;
   }
 
   void print_predecessors(bool zero_indexed=true) {
     const T INFTY = std::numeric_limits<T>::max();
     auto print_idx = zero_indexed ? 0 : 1;
-    for (auto i = 0; i < predecessors.size(); i++) {
+
+    for (size_t i = 0; i < predecessors.size(); i++) {
       if (predecessors[i] == NO_PREDECESSOR)
-        std::cout << "v_" << print_idx++ << ": NIL" << std::endl;
+        std::cout << "NIL";
       else
-        std::cout << "v_" << print_idx++ << ": " << predecessors[i] << std::endl;
+        std::cout << predecessors[i];
+      std::cout << "\t";
     }
+    std::cout << std::endl;
   }
 };
-
-// ¿Medir tiempo de creación de lista de adyacencia en experimentos? (pasar grafo "raw" a Bellman-Ford)
-// ¿o pasarle la lista de adyacencia lista?
 
 /*
 Calcula la distancia mínima desde una raíz `root` a todos los vértices la lista de adyacencia `g_adj_list`.
@@ -82,14 +86,33 @@ BellmanFordResult<T> Bellman_Ford(AdjacencyList<T>& g_adj_list, size_t root) {
         continue;
       
       if (dist_to_root[edge.head_vertex] > dist_to_root[u] + edge.weight) {
-        BellmanFordResult<T> result{ false, dist_to_root, predecessor };
+        BellmanFordResult<T> result{ false, dist_to_root, predecessor, root };
         return result;
       }
     }
   }
 
-  BellmanFordResult<T> result{ true, dist_to_root, predecessor };
+  BellmanFordResult<T> result{ true, dist_to_root, predecessor, root };
   return result;
+}
+
+// ¿Medir tiempo de creación de lista de adyacencia en experimentos? (pasar grafo "raw" a Bellman-Ford APSP)
+// ¿o pasarle la lista de adyacencia ya hecha?
+template <typename T>
+std::vector<BellmanFordResult<T>> Bellman_Ford_APSP(AdjacencyList<T> adjlist) {
+  size_t n_verts = adjlist.size();
+  std::vector<BellmanFordResult<T>> apsp_result(n_verts);
+  for (size_t v = 0; v < n_verts; v++) {
+    apsp_result[v] = Bellman_Ford(adjlist, v);
+  }
+  return apsp_result;
+}
+
+/* Overload que acepta matriz de adyacencia y construye lista de adyacencia antes de llamar BF. */
+template <typename T>
+std::vector<BellmanFordResult<T>> Bellman_Ford_APSP(Graph<T> adjmat) {
+  AdjacencyList<T> adjlist = AdjacencyList<T>(adjmat);
+  return Bellman_Ford_APSP(adjlist);
 }
 
 #endif
