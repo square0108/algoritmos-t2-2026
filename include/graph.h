@@ -131,7 +131,7 @@ struct AdjacencyList{
     T weight;
   };
 
-  std::vector<std::forward_list<EdgeHead>> adj_list;
+  std::vector<std::vector<EdgeHead>> adj_list;
 
   AdjacencyList(){
   }
@@ -140,7 +140,7 @@ struct AdjacencyList{
     size_t n_verts = g.size();
     adj_list.resize(
       n_verts,
-      std::forward_list<EdgeHead>()
+      std::vector<EdgeHead>()
     );
 
     T T_max = std::numeric_limits<T>::max();
@@ -150,14 +150,14 @@ struct AdjacencyList{
       for (size_t j = 0; j < n_verts; j++) {
         if (g[i][j] != T() && g[i][j] != T_max) {
           EdgeHead new_neighbor = {j,g[i][j]};
-          (adj_list[i]).push_front(new_neighbor);
+          (adj_list[i]).push_back(new_neighbor);
         }
       }
     }
   }
 
   // Get the list of vertex i's neighbors
-  std::forward_list<EdgeHead> &operator[](size_t i) {
+  std::vector<EdgeHead> &operator[](size_t i) {
     return adj_list[i];
   }
 
@@ -171,7 +171,7 @@ struct AdjacencyList{
 
     for (size_t i = 0; i < n_verts; i++) {
       std::cout << i << ": ";
-      std::forward_list<EdgeHead> list = adj_list[i];
+      std::vector<EdgeHead> list = adj_list[i];
 
       for (auto& tail_edge : list) {
         std::cout << "(" 
