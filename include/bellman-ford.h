@@ -11,7 +11,7 @@ struct BellmanFordResult
   std::vector<size_t> predecessors;
   size_t root;
 
-  BellmanFordResult(){}
+  BellmanFordResult() {}
 
   BellmanFordResult(bool nc, std::vector<T> &d, std::vector<size_t> &p, size_t r)
   {
@@ -121,7 +121,7 @@ BellmanFordResult<T> Bellman_Ford(AdjacencyList<T> &g_adj_list, size_t root)
 // ¿Medir tiempo de creación de lista de adyacencia en experimentos? (pasar grafo "raw" a Bellman-Ford APSP)
 // ¿o pasarle la lista de adyacencia ya hecha?
 template <typename T>
-std::vector<BellmanFordResult<T>> Bellman_Ford_APSP(AdjacencyList<T> adjlist)
+std::vector<BellmanFordResult<T>> Bellman_Ford_APSP(AdjacencyList<T> &adjlist)
 {
   size_t n_verts = adjlist.size();
   std::vector<BellmanFordResult<T>> apsp_result(n_verts);
@@ -134,7 +134,7 @@ std::vector<BellmanFordResult<T>> Bellman_Ford_APSP(AdjacencyList<T> adjlist)
 
 /* Overload que acepta matriz de adyacencia y construye lista de adyacencia antes de llamar BF. */
 template <typename T>
-std::vector<BellmanFordResult<T>> Bellman_Ford_APSP(Graph<T> adjmat)
+std::vector<BellmanFordResult<T>> Bellman_Ford_APSP(Graph<T> &adjmat)
 {
   AdjacencyList<T> adjlist = AdjacencyList<T>(adjmat);
   return Bellman_Ford_APSP(adjlist);
