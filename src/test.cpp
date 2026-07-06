@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
   if (print_results)
   {
-    //std::cout << "Adjacency matrix: " << std::endl;
+    std::cout << "Adjacency matrix: " << std::endl;
     g.print();
     //std::cout << "Adjacency list: " << std::endl;
     //a.print();
@@ -87,15 +87,29 @@ void error_msg() {
 
 template <typename T>
 void debug_print_results(FloydWarshallResult<T> r, bool zero_indexed) {
-  std::cout << "No negative cycle?: " << r.no_negative_cycles << std::endl;
+  std::cout << "Negative cycle?: ";
+  if (r.no_negative_cycles) std::cout << "No" << std::endl;
+  else std::cout << "Yes" << std::endl;
+
   std::cout << "Shortest path distances: " << std::endl;
   r.print_distances(zero_indexed);
+
   std::cout << "Shortest path predecessors: " << std::endl;
   r.print_predecessors(zero_indexed);
 }
 
 template <typename T>
 void debug_print_results(std::vector<BellmanFordResult<T>> bf_r, bool zero_indexed) {
+  std::cout << "Negative cycle?: ";
+  bool neg_flag = true;
+
+  for (auto& it : bf_r) {
+    if (!(it.no_negative_cycles)) neg_flag = false;
+  }
+
+  if (neg_flag) std::cout << "No" << std::endl;
+  else std::cout << "Yes" << std::endl;
+
   std::cout << "Shortest path distances" << std::endl;
   for (size_t i = 0; i < bf_r.size(); i++) {
     BellmanFordResult<T> r = bf_r[i];
