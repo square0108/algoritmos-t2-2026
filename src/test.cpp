@@ -56,10 +56,10 @@ int main(int argc, char *argv[])
 
   if (print_results)
   {
-    std::cout << "Adjacency matrix: " << std::endl;
+    //std::cout << "Adjacency matrix: " << std::endl;
     g.print();
-    std::cout << "Adjacency list: " << std::endl;
-    a.print();
+    //std::cout << "Adjacency list: " << std::endl;
+    //a.print();
   }
 
   // Decide which algorithm to use
